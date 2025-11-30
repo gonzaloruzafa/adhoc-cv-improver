@@ -33,9 +33,17 @@ export interface AnalysisFeedback {
   conclusion: string;
 }
 
+export interface TrackingData {
+  perfilInteres: 'Alto' | 'Medio' | 'Bajo';
+  ciudad: string;
+  pais: string;
+  puestosAfines: string[];
+}
+
 export interface AnalysisResult {
   feedback: AnalysisFeedback;
   cvData: CVData;
+  tracking: TrackingData;
 }
 
 export enum AppState {

@@ -4,6 +4,7 @@ import { Header } from './components/Header';
 import FileUpload from './components/FileUpload';
 import ResultView from './components/ResultView';
 import { analyzeCV } from './services/gemini';
+import { logCVAnalysis } from './services/supabase';
 import { AnalysisResult, AppState } from './types';
 
 function App() {
@@ -18,6 +19,17 @@ function App() {
       const data = await analyzeCV(file);
       setResult(data);
       setAppState(AppState.SUCCESS);
+      
+      // Log to Supabase
+      await logCVAnalysis({
+        nombre: data.cvData.fullName,
+        perfil_interes: data.tracking.perfilInteres,
+        ciudad: data.tracking.ciudad,
+        pais: data.tracking.pais,
+        email: data.cvData.contactInfo.email || '',
+        telefono: data.cvData.contactInfo.phone || '',
+        puestos_afines: data.tracking.puestosAfines
+      });
     } catch (err: any) {
       console.error(err);
       setError("Hubo un error al analizar el CV. Por favor, probá de nuevo. Asegurate de que el archivo sea un PDF o texto legible.");

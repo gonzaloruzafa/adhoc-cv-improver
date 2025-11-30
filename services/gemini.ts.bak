@@ -108,28 +108,9 @@ export const analyzeCV = async (file: File): Promise<AnalysisResult> => {
           }
         },
         required: ["fullName", "experience", "education", "skills"]
-      },
-      tracking: {
-        type: Type.OBJECT,
-        description: "Datos para tracking interno.",
-        properties: {
-          perfilInteres: {
-            type: Type.STRING,
-            description: "Nivel de interés del perfil: Alto, Medio o Bajo",
-            enum: ["Alto", "Medio", "Bajo"]
-          },
-          ciudad: { type: Type.STRING, description: "Ciudad del candidato" },
-          pais: { type: Type.STRING, description: "País del candidato" },
-          puestosAfines: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: "Lista de 3-5 puestos para los que este perfil sería ideal"
-          }
-        },
-        required: ["perfilInteres", "ciudad", "pais", "puestosAfines"]
       }
     },
-    required: ["feedback", "cvData", "tracking"]
+    required: ["feedback", "cvData"]
   };
 
   const model = "gemini-2.5-flash";
@@ -157,11 +138,6 @@ export const analyzeCV = async (file: File): Promise<AnalysisResult> => {
             2. Extraé y reescribí el contenido del CV ("cvData") para que quede perfecto para un sistema ATS:
                - Redactá un resumen profesional potente.
                - Mejorá las descripciones de experiencia usando verbos de acción y métricas.
-            
-            3. Generá datos de tracking ("tracking"):
-               - **perfilInteres**: Evaluá si es un perfil Alto, Medio o Bajo (basándote en experiencia, skills y potencial).
-               - **ciudad** y **pais**: Extraélos del CV.
-               - **puestosAfines**: Listá 3-5 puestos específicos para los que este perfil sería ideal.
                
             IMPORTANTE:
             - Hablá siempre de "vos" (español argentino).
