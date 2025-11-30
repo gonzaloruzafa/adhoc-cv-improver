@@ -40,10 +40,17 @@ export interface TrackingData {
   puestosAfines: string[];
 }
 
+export interface CVRanking {
+  score: number; // 0-100
+  nivel: '🌟 Principiante' | '⭐ En Camino' | '✨ Competitivo' | '🚀 Destacado' | '💎 Excepcional';
+  mensaje: string;
+}
+
 export interface AnalysisResult {
   feedback: AnalysisFeedback;
   cvData: CVData;
   tracking: TrackingData;
+  ranking: CVRanking;
 }
 
 export enum AppState {

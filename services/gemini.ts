@@ -127,9 +127,29 @@ export const analyzeCV = async (file: File): Promise<AnalysisResult> => {
           }
         },
         required: ["perfilInteres", "ciudad", "pais", "puestosAfines"]
+      },
+      ranking: {
+        type: Type.OBJECT,
+        description: "Sistema de ranking gamificado del CV.",
+        properties: {
+          score: {
+            type: Type.NUMBER,
+            description: "Puntaje de 0 a 100. Sé generoso: 40-55 es principiante, 56-65 en camino, 66-75 competitivo, 76-85 destacado, 86+ excepcional. Incluso CVs básicos pueden tener 45-50."
+          },
+          nivel: {
+            type: Type.STRING,
+            description: "Nivel según score",
+            enum: ["🌟 Principiante", "⭐ En Camino", "✨ Competitivo", "🚀 Destacado", "💎 Excepcional"]
+          },
+          mensaje: {
+            type: Type.STRING,
+            description: "Mensaje motivador personalizado explicando el score y qué hacer para subir de nivel."
+          }
+        },
+        required: ["score", "nivel", "mensaje"]
       }
     },
-    required: ["feedback", "cvData", "tracking"]
+    required: ["feedback", "cvData", "tracking", "ranking"]
   };
 
   const model = "gemini-2.5-flash";
@@ -162,11 +182,22 @@ export const analyzeCV = async (file: File): Promise<AnalysisResult> => {
                - **perfilInteres**: Evaluá si es un perfil Alto, Medio o Bajo (basándote en experiencia, skills y potencial).
                - **ciudad** y **pais**: Extraélos del CV.
                - **puestosAfines**: Listá 3-5 puestos específicos para los que este perfil sería ideal.
+            
+            4. Generá un ranking gamificado ("ranking"):
+               - **score**: Dale un puntaje de 0 a 100. SÉ GENEROSO para motivar:
+                 * 40-55: Principiante (CV básico pero con potencial)
+                 * 56-65: En Camino (tiene fundamentos, necesita pulir)
+                 * 66-75: Competitivo (buen CV, listo para aplicar)
+                 * 76-85: Destacado (excelente CV, va a llamar la atención)
+                 * 86-100: Excepcional (CV de oro, difícil de mejorar)
+               - **nivel**: Asigná el emoji + nivel según el score.
+               - **mensaje**: Escribí un mensaje motivador personalizado que explique por qué tiene ese score y QUÉ PUEDE HACER para subir al siguiente nivel (2-3 líneas).
                
             IMPORTANTE:
             - Hablá siempre de "vos" (español argentino).
             - Sé directo, amable y profesional.
-            - Usá terminología local (ej: "Laburo", "CV", "Recruiter").`
+            - Usá terminología local (ej: "Laburo", "CV", "Recruiter").
+            - En el ranking, NUNCA des menos de 40 puntos. Todos tienen potencial.`
           }
         ]
       },

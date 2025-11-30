@@ -20,6 +20,9 @@ export interface CVAnalysis {
   email: string;
   telefono: string;
   puestos_afines: string[];
+  cv_data?: any; // Datos estructurados del CV
+  file_name?: string;
+  file_data?: string; // Base64
 }
 
 export const logCVAnalysis = async (data: Omit<CVAnalysis, 'id' | 'created_at'>) => {

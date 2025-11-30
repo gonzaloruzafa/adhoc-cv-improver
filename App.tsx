@@ -20,7 +20,15 @@ function App() {
       setResult(data);
       setAppState(AppState.SUCCESS);
       
-      // Log to Supabase
+      // Convertir archivo a base64
+      const reader = new FileReader();
+      const fileBase64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      
+      // Log to Supabase con datos completos
       await logCVAnalysis({
         nombre: data.cvData.fullName,
         perfil_interes: data.tracking.perfilInteres,
@@ -28,7 +36,10 @@ function App() {
         pais: data.tracking.pais,
         email: data.cvData.contactInfo.email || '',
         telefono: data.cvData.contactInfo.phone || '',
-        puestos_afines: data.tracking.puestosAfines
+        puestos_afines: data.tracking.puestosAfines,
+        cv_data: data.cvData,
+        file_name: file.name,
+        file_data: fileBase64
       });
     } catch (err: any) {
       console.error(err);
