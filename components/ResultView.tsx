@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FileText, Download, CheckCircle, AlertTriangle, Hammer, Sparkles } from 'lucide-react';
 import { AnalysisResult } from '../types';
 import { generateATSPdf } from '../utils/pdf';
+import { generateRankingImage } from '../utils/shareImage';
 
 interface ResultViewProps {
   result: AnalysisResult;
@@ -96,37 +97,45 @@ const ResultView: React.FC<ResultViewProps> = ({ result, onReset }) => {
                 </div>
                 
                 {/* Progress Bar with Levels */}
-                <div className="mb-6">
-                  <div className="relative h-8 bg-white/20 rounded-full overflow-visible backdrop-blur-sm">
-                    {/* Progress fill */}
+                <div className="mb-6 space-y-3">
+                  {/* Level indicators above bar */}
+                  <div className="flex justify-between items-end px-2">
+                    {[
+                      { emoji: '🌟', name: 'Principiante', threshold: 40 },
+                      { emoji: '⭐', name: 'En Camino', threshold: 56 },
+                      { emoji: '✨', name: 'Competitivo', threshold: 66 },
+                      { emoji: '🚀', name: 'Destacado', threshold: 76 },
+                      { emoji: '💎', name: 'Excepcional', threshold: 86 }
+                    ].map((level, idx) => (
+                      <div 
+                        key={idx}
+                        className="flex flex-col items-center -space-y-1"
+                      >
+                        <div className={`text-3xl transition-all duration-300 ${result.ranking.score >= level.threshold ? 'scale-110 drop-shadow-lg' : 'opacity-40 scale-90 grayscale'}`}>
+                          {level.emoji}
+                        </div>
+                        <div className={`text-[10px] font-secondary text-center leading-tight ${result.ranking.score >= level.threshold ? 'font-bold text-white' : 'opacity-60 text-white/70'}`}>
+                          {level.name}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Progress bar */}
+                  <div className="relative h-4 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
                     <div 
-                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-adhoc-mostaza to-adhoc-coral rounded-full transition-all duration-1000 ease-out shadow-lg"
+                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-adhoc-mostaza via-adhoc-coral to-pink-500 rounded-full transition-all duration-1000 ease-out shadow-lg"
                       style={{ width: `${result.ranking.score}%` }}
                     />
-                    
-                    {/* Level markers */}
-                    <div className="absolute inset-0 flex items-center justify-between px-1">
-                      {[
-                        { emoji: '🌟', name: 'Principiante', pos: 0 },
-                        { emoji: '⭐', name: 'En Camino', pos: 55 },
-                        { emoji: '✨', name: 'Competitivo', pos: 65 },
-                        { emoji: '🚀', name: 'Destacado', pos: 75 },
-                        { emoji: '💎', name: 'Excepcional', pos: 85 }
-                      ].map((level, idx) => (
-                        <div 
-                          key={idx}
-                          className="absolute flex flex-col items-center -translate-x-1/2"
-                          style={{ left: `${level.pos}%` }}
-                        >
-                          <div className={`text-2xl mb-1 transition-all duration-300 ${result.ranking.score >= level.pos ? 'scale-110 drop-shadow-lg' : 'opacity-50 scale-90'}`}>
-                            {level.emoji}
-                          </div>
-                          <div className={`text-xs font-secondary whitespace-nowrap ${result.ranking.score >= level.pos ? 'font-bold' : 'opacity-70'}`}>
-                            {level.name}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  </div>
+                  
+                  {/* Threshold markers */}
+                  <div className="flex justify-between text-xs font-secondary text-white/60 px-2">
+                    <span>40</span>
+                    <span>56</span>
+                    <span>66</span>
+                    <span>76</span>
+                    <span>86</span>
                   </div>
                 </div>
                 
@@ -138,11 +147,32 @@ const ResultView: React.FC<ResultViewProps> = ({ result, onReset }) => {
                 <div className="flex gap-3 flex-wrap">
                   {/* LinkedIn */}
                   <button
-                    onClick={() => {
-                      const text = `¡Logré ${result.ranking.score} puntos en mi CV! 🎯 Nivel: ${result.ranking.nivel}\n\n¿Querés mejorar tu CV? Probá la herramienta de Adhoc:`;
-                      const url = window.location.origin;
-                      const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&summary=${encodeURIComponent(text)}`;
-                      window.open(shareUrl, '_blank', 'width=550,height=600');
+                    onClick={async () => {
+                      try {
+                        const imageBlob = await generateRankingImage(result.ranking, cvData.fullName);
+                        const file = new File([imageBlob], 'mi-cv-ranking.png', { type: 'image/png' });
+                        
+                        // Check if Web Share API is available with file support
+                        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                          await navigator.share({
+                            title: `Mi resultado en Adhoc CV: ${result.ranking.score} puntos`,
+                            text: `¡Logré ${result.ranking.score} puntos en mi CV! 🎯 Nivel: ${result.ranking.nivel}`,
+                            files: [file]
+                          });
+                        } else {
+                          // Fallback: download image
+                          const url = URL.createObjectURL(imageBlob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = 'mi-cv-ranking.png';
+                          a.click();
+                          URL.revokeObjectURL(url);
+                          alert('📸 Imagen descargada! Subila a LinkedIn manualmente');
+                        }
+                      } catch (err) {
+                        console.error('Error sharing:', err);
+                        alert('Hubo un error. Intentá de nuevo.');
+                      }
                     }}
                     className="flex-1 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg font-secondary font-medium transition-all border border-white/30 flex items-center justify-center gap-2"
                   >
@@ -152,13 +182,34 @@ const ResultView: React.FC<ResultViewProps> = ({ result, onReset }) => {
                     LinkedIn
                   </button>
                   
-                  {/* Copy for Instagram */}
+                  {/* Instagram */}
                   <button
-                    onClick={() => {
-                      const text = `¡Logré ${result.ranking.score} puntos ${result.ranking.nivel} en mi CV! 🎯\n\n¿Querés mejorar tu CV? Probá la herramienta de Adhoc (link en bio)`;
-                      navigator.clipboard.writeText(text).then(() => {
-                        alert('✅ Texto copiado! Ahora pegalo en tu historia de Instagram');
-                      });
+                    onClick={async () => {
+                      try {
+                        const imageBlob = await generateRankingImage(result.ranking, cvData.fullName);
+                        const file = new File([imageBlob], 'mi-cv-ranking.png', { type: 'image/png' });
+                        
+                        // Check if Web Share API is available
+                        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                          await navigator.share({
+                            title: 'Mi resultado en Adhoc CV',
+                            text: `¡Logré ${result.ranking.score} puntos ${result.ranking.nivel} en mi CV! 🎯`,
+                            files: [file]
+                          });
+                        } else {
+                          // Fallback: download image
+                          const url = URL.createObjectURL(imageBlob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = 'mi-cv-ranking.png';
+                          a.click();
+                          URL.revokeObjectURL(url);
+                          alert('📸 Imagen descargada! Subila a tu historia de Instagram');
+                        }
+                      } catch (err) {
+                        console.error('Error sharing:', err);
+                        alert('Hubo un error. Intentá de nuevo.');
+                      }
                     }}
                     className="flex-1 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg font-secondary font-medium transition-all border border-white/30 flex items-center justify-center gap-2"
                   >
