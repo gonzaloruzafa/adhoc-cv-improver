@@ -262,10 +262,12 @@ export default async function handler(
     };
 
     const prompt = `
-      Analiza el CV adjunto y proporciona feedback constructivo y detallado.
+      **IMPORTANTE: RESPONDE SIEMPRE EN ESPAÑOL**
+      
+      Analiza el CV adjunto y proporciona feedback constructivo y detallado. Toda la respuesta debe estar EN ESPAÑOL.
       
       1. FEEDBACK:
-         - Identifica 3-5 fortalezas principales
+         - Identifica 3-5 fortalezas principales del CV
          - Identifica 3-5 áreas de mejora específicas
          - Proporciona un plan de acción concreto con pasos accionables
          - Escribe una conclusión motivadora
@@ -286,7 +288,7 @@ export default async function handler(
          - Clasifica en nivel según el score
          - Proporciona un mensaje motivador personalizado
       
-      Sé constructivo, específico y motivador en todo el análisis.
+      Sé constructivo, específico y motivador en todo el análisis. Recuerda: TODO EN ESPAÑOL.
     `;
 
     const response = await ai.models.generateContent({
