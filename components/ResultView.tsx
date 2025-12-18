@@ -238,6 +238,24 @@ Usé el analizador de CVs de Adhoc y me ayudó a mejorar mi perfil profesional.
               </div>
             </div>
 
+            {/* Call to Action - Aplicar a Trabajos */}
+            <div className="bg-gradient-to-r from-adhoc-coral to-orange-500 p-6 rounded-xl shadow-lg text-white">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="text-center md:text-left">
+                  <h3 className="text-xl font-primary font-bold mb-2">¿Querés aplicar a un trabajo en tecnología?</h3>
+                  <p className="font-secondary opacity-95">Explorá las oportunidades disponibles en Adhoc</p>
+                </div>
+                <a 
+                  href="https://www.adhoc.inc/jobs" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="px-8 py-3 bg-white text-adhoc-coral hover:bg-gray-50 rounded-lg font-secondary font-bold transition-all transform hover:scale-105 shadow-lg whitespace-nowrap"
+                >
+                  Ver Oportunidades →
+                </a>
+              </div>
+            </div>
+
             {/* Conclusion */}
             <div className="bg-gradient-to-r from-adhoc-violeta to-adhoc-lavanda p-6 rounded-xl shadow-md text-white">
               <div className="flex items-center gap-3 mb-3">
