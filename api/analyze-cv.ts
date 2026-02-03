@@ -95,7 +95,8 @@ export default async function handler(
     'http://localhost:5173',
     'http://localhost:3000',
     process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
-    'https://adhoc-cv-improver.vercel.app' // Ajustar a tu dominio
+    'https://adhoc-cv-improver.vercel.app',
+    'https://mejoratucv.adhoc.inc'
   ].filter(Boolean);
 
   if (origin && !allowedOrigins.includes(origin)) {
@@ -292,7 +293,7 @@ export default async function handler(
     `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-flash",
       contents: [
         {
           parts: [
