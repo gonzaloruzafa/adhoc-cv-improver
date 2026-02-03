@@ -138,15 +138,15 @@ export default async function handler(
     const genAI = new GoogleGenerativeAI(apiKey);
 
     const schema = {
-      type: SchemaSchemaType.OBJECT,
+      type: SchemaType.OBJECT,
       properties: {
         feedback: {
-          type: SchemaSchemaType.OBJECT,
+          type: SchemaType.OBJECT,
           description: "Structured analysis of the CV.",
           properties: {
             strengths: {
-              type: SchemaSchemaType.ARRAY,
-              items: { type: SchemaSchemaType.STRING },
+              type: SchemaType.ARRAY,
+              items: { type: SchemaType.STRING },
               description: "List of 3-5 positive aspects of the CV."
             },
             improvements: {
