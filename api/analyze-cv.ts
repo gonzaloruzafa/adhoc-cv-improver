@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { GoogleGenAI, Type, Schema } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
 // Rate limiting: almacena timestamps de requests por IP
 const requestCounts = new Map<string, number[]>();
@@ -135,124 +135,124 @@ export default async function handler(
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey });
+    const genAI = new GoogleGenerativeAI(apiKey);
 
-    const schema: Schema = {
-      type: Type.OBJECT,
+    const schema = {
+      type: SchemaSchemaType.OBJECT,
       properties: {
         feedback: {
-          type: Type.OBJECT,
+          type: SchemaSchemaType.OBJECT,
           description: "Structured analysis of the CV.",
           properties: {
             strengths: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
+              type: SchemaSchemaType.ARRAY,
+              items: { type: SchemaSchemaType.STRING },
               description: "List of 3-5 positive aspects of the CV."
             },
             improvements: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
+              type: SchemaType.ARRAY,
+              items: { type: SchemaType.STRING },
               description: "List of 3-5 specific areas that need improvement."
             },
             actionPlan: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
+              type: SchemaType.ARRAY,
+              items: { type: SchemaType.STRING },
               description: "Concrete, actionable steps the user should take to fix the issues."
             },
             conclusion: {
-              type: Type.STRING,
+              type: SchemaType.STRING,
               description: "A final encouraging summary paragraph."
             }
           },
           required: ["strengths", "improvements", "actionPlan", "conclusion"]
         },
         cvData: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           description: "Structured data extracted and optimized for ATS systems.",
           properties: {
-            fullName: { type: Type.STRING },
+            fullName: { type: SchemaType.STRING },
             contactInfo: {
-              type: Type.OBJECT,
+              type: SchemaType.OBJECT,
               properties: {
-                email: { type: Type.STRING },
-                phone: { type: Type.STRING },
-                linkedin: { type: Type.STRING },
-                location: { type: Type.STRING },
+                email: { type: SchemaType.STRING },
+                phone: { type: SchemaType.STRING },
+                linkedin: { type: SchemaType.STRING },
+                location: { type: SchemaType.STRING },
               }
             },
-            professionalSummary: { type: Type.STRING, description: "A strong, concise professional summary." },
+            professionalSummary: { type: SchemaType.STRING, description: "A strong, concise professional summary." },
             experience: {
-              type: Type.ARRAY,
+              type: SchemaType.ARRAY,
               items: {
-                type: Type.OBJECT,
+                type: SchemaType.OBJECT,
                 properties: {
-                  role: { type: Type.STRING },
-                  company: { type: Type.STRING },
-                  dates: { type: Type.STRING },
+                  role: { type: SchemaType.STRING },
+                  company: { type: SchemaType.STRING },
+                  dates: { type: SchemaType.STRING },
                   description: { 
-                    type: Type.ARRAY, 
-                    items: { type: Type.STRING },
+                    type: SchemaType.ARRAY, 
+                    items: { type: SchemaType.STRING },
                     description: "Bullet points describing achievements, starting with action verbs."
                   }
                 }
               }
             },
             education: {
-              type: Type.ARRAY,
+              type: SchemaType.ARRAY,
               items: {
-                type: Type.OBJECT,
+                type: SchemaType.OBJECT,
                 properties: {
-                  degree: { type: Type.STRING },
-                  institution: { type: Type.STRING },
-                  year: { type: Type.STRING }
+                  degree: { type: SchemaType.STRING },
+                  institution: { type: SchemaType.STRING },
+                  year: { type: SchemaType.STRING }
                 }
               }
             },
             skills: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING }
+              type: SchemaType.ARRAY,
+              items: { type: SchemaType.STRING }
             },
             languages: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING }
+              type: SchemaType.ARRAY,
+              items: { type: SchemaType.STRING }
             }
           },
           required: ["fullName", "experience", "education", "skills"]
         },
         tracking: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           description: "Datos para tracking interno.",
           properties: {
             perfilInteres: {
-              type: Type.STRING,
+              type: SchemaType.STRING,
               description: "Nivel de interés del perfil: Alto, Medio o Bajo",
               enum: ["Alto", "Medio", "Bajo"]
             },
-            ciudad: { type: Type.STRING, description: "Ciudad del candidato" },
-            pais: { type: Type.STRING, description: "País del candidato" },
+            ciudad: { type: SchemaType.STRING, description: "Ciudad del candidato" },
+            pais: { type: SchemaType.STRING, description: "País del candidato" },
             puestosAfines: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
+              type: SchemaType.ARRAY,
+              items: { type: SchemaType.STRING },
               description: "Lista de 3-5 puestos para los que este perfil sería ideal"
             }
           },
           required: ["perfilInteres", "ciudad", "pais", "puestosAfines"]
         },
         ranking: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           description: "Sistema de ranking gamificado del CV.",
           properties: {
             score: {
-              type: Type.NUMBER,
+              type: SchemaType.NUMBER,
               description: "Puntaje de 0 a 100. Sé generoso: 40-55 es principiante, 56-65 en camino, 66-75 competitivo, 76-85 destacado, 86+ excepcional. Incluso CVs básicos pueden tener 45-50."
             },
             nivel: {
-              type: Type.STRING,
+              type: SchemaType.STRING,
               description: "Nivel según score",
               enum: ["🌟 Principiante", "⭐ En Camino", "✨ Competitivo", "🚀 Destacado", "💎 Excepcional"]
             },
             mensaje: {
-              type: Type.STRING,
+              type: SchemaType.STRING,
               description: "Mensaje motivador personalizado explicando el score y qué hacer para subir de nivel."
             }
           },
@@ -292,33 +292,30 @@ export default async function handler(
       Sé constructivo, específico y motivador en todo el análisis. Recuerda: TODO EN ESPAÑOL.
     `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-1.5-pro-latest",
-      contents: [
-        {
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                mimeType: mimeType,
-                data: fileData
-              }
-            }
-          ]
-        }
-      ],
-      config: {
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.0-flash-exp",
+      generationConfig: {
         responseMimeType: "application/json",
         responseSchema: schema,
-      },
+      }
     });
 
-    const result: AnalysisResult = JSON.parse(response.text || '{}');
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          mimeType: mimeType,
+          data: fileData
+        }
+      }
+    ]);
+
+    const analysisResult: AnalysisResult = JSON.parse(result.response.text() || '{}');
 
     // Log exitoso (sin datos sensibles)
-    console.log(`CV analyzed successfully for IP: ${ip}, name: ${result.cvData?.fullName || 'unknown'}`);
+    console.log(`CV analyzed successfully for IP: ${ip}, name: ${analysisResult.cvData?.fullName || 'unknown'}`);
 
-    return res.status(200).json(result);
+    return res.status(200).json(analysisResult);
 
   } catch (error: any) {
     console.error('Error analyzing CV:', error);
